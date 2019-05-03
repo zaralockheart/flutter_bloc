@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:bloc_test/login_repository.dart';
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
@@ -43,6 +45,10 @@ class LoginError extends LoginState {
 }
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
+
+  final LoginRepository repository;
+
+  LoginBloc({this.repository});
   @override
   // TODO: implement initialState
   LoginState get initialState => LoginEmpty();
@@ -52,11 +58,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     if (event is FetchLogin) {
       yield LoginLoading();
       try {
-        Future.delayed(Duration(seconds: 1));
-//        throw "Error";
-        yield LoginSuccess(username: event.username);
-      } catch (e) {
-        yield LoginError(error: e);
+        var response = await repository.fetchTodo();
+        String responseString = response.data.toString();
+
+        yield LoginSuccess(username:responseString);
+      } on DioError catch (e) {
+        yield LoginError(error: e.response.statusCode.toString());
       }
     } else if (event is ClearLogin ) {
       yield LoginEmpty();

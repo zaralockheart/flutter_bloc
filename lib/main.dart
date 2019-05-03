@@ -15,7 +15,6 @@ class MyApp extends StatelessWidget {
   final MainBloc mainBloc;
 
   const MyApp({Key key, this.mainBloc}) : super(key: key);
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

@@ -5,15 +5,24 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:bloc_test/dio.dart';
 import 'package:bloc_test/main_bloc.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:mockito/mockito.dart';
 import 'package:bloc_test/main.dart';
+
+class DioMock extends Mock implements Dio {}
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+
+    dio = DioMock();
+
+    when(dio.get('https://jsonplaceholder.typicode.com/todos/1')).thenAnswer(
+            (_) => throw DioError(response: Response(statusCode: 400)));
+
     await tester.pumpWidget(MyApp(
       mainBloc: MainBloc(),
     ));
@@ -23,9 +32,26 @@ void main() {
 
     // Tap the '+' icon and trigger a frame.
     await tester.tap(find.byIcon(Icons.add));
-    await tester.pump(new Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     // Verify that our counter has incremented.
-//    expect(find.text('Error'), findsOneWidget);
+    expect(find.text('400'), findsOneWidget);
+
+    when(dio.get('https://jsonplaceholder.typicode.com/todos/1')).thenAnswer(
+            (_) => throw DioError(response: Response(statusCode: 500)));
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    expect(find.text('500'), findsOneWidget);
+
+    when(dio.get('https://jsonplaceholder.typicode.com/todos/1')).thenAnswer(
+            (_) => Future.value(Response(data: "Name")));
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Name'), findsOneWidget);
+
   });
 }

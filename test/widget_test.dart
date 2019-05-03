@@ -5,13 +5,15 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:bloc_test/dio.dart';
+import 'dart:convert';
+
+import 'package:bloc_test/util/dio.dart';
 import 'package:bloc_test/main_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:bloc_test/main.dart';
+import 'package:bloc_test/ui/login/login.dart';
 
 class DioMock extends Mock implements Dio {}
 
@@ -46,12 +48,18 @@ void main() {
     expect(find.text('500'), findsOneWidget);
 
     when(dio.get('https://jsonplaceholder.typicode.com/todos/1')).thenAnswer(
-            (_) => Future.value(Response(data: "Name")));
+            (_) => Future.value(Response(data: json.decode("""
+            {
+              "userId": 1, 
+              "id": 1, 
+              "title": "delectus aut autem", 
+              "completed": false
+            }"""))));
 
     await tester.tap(find.byIcon(Icons.add));
     await tester.pumpAndSettle();
 
-    expect(find.text('Name'), findsOneWidget);
+    expect(find.text("{userId: 1, id: 1, title: delectus aut autem, completed: false}"), findsOneWidget);
 
   });
 }

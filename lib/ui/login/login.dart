@@ -1,5 +1,7 @@
-import 'package:bloc_test/login_bloc.dart';
+import 'package:bloc_test/ui/login/blocs/login_bloc.dart';
 import 'package:bloc_test/main_bloc.dart';
+import 'package:bloc_test/ui/login/blocs/login_event.dart';
+import 'package:bloc_test/ui/login/blocs/login_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc_test/dio.dart';
+import 'package:bloc_test/util/dio.dart';
 import 'package:dio/dio.dart';
 
 class LoginRepository {

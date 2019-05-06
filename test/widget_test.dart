@@ -7,45 +7,27 @@
 
 import 'dart:convert';
 
+import 'package:bloc_test/ui/architectures/bloc/main.dart';
 import 'package:bloc_test/util/dio.dart';
 import 'package:bloc_test/main_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:bloc_test/ui/login/login.dart';
 
 class DioMock extends Mock implements Dio {}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
 
+  setUp(() {
     dio = DioMock();
+  });
 
-    when(dio.get('https://jsonplaceholder.typicode.com/todos/1')).thenAnswer(
-            (_) => throw DioError(response: Response(statusCode: 400)));
+  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
 
     await tester.pumpWidget(MyApp(
       mainBloc: MainBloc(),
     ));
-
-    // Verify that our counter starts at 0.
-    expect(find.text('No Username'), findsOneWidget);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pumpAndSettle();
-
-    // Verify that our counter has incremented.
-    expect(find.text('400'), findsOneWidget);
-
-    when(dio.get('https://jsonplaceholder.typicode.com/todos/1')).thenAnswer(
-            (_) => throw DioError(response: Response(statusCode: 500)));
-
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pumpAndSettle();
-
-    expect(find.text('500'), findsOneWidget);
 
     when(dio.get('https://jsonplaceholder.typicode.com/todos/1')).thenAnswer(
             (_) => Future.value(Response(data: json.decode("""
@@ -56,10 +38,44 @@ void main() {
               "completed": false
             }"""))));
 
+    expect(find.byKey(Key('username')), findsOneWidget);
+    await tester.enterText(find.byKey(Key('username')), 'asdf');
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.add));
     await tester.pumpAndSettle();
 
-    expect(find.text("{userId: 1, id: 1, title: delectus aut autem, completed: false}"), findsOneWidget);
+    expect(find.text('asdf'), findsOneWidget);
 
+  });
+
+  testWidgets('this fail and show 400', (WidgetTester tester) async {
+    await tester.pumpWidget(MyApp(
+      mainBloc: MainBloc(),
+    ));
+
+    when(dio.get('https://jsonplaceholder.typicode.com/todos/1')).thenAnswer(
+            (_) => throw DioError(response: Response(statusCode: 400)));
+
+    // Tap the '+' icon and trigger a frame.
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    // Verify that our counter has incremented.
+    expect(find.text('400'), findsOneWidget);
+  });
+
+
+  testWidgets(('this fail and show 500'), (WidgetTester tester) async {
+    when(dio.get('https://jsonplaceholder.typicode.com/todos/1')).thenAnswer(
+            (_) => throw DioError(response: Response(statusCode: 500)));
+
+    await tester.pumpWidget(MyApp(
+      mainBloc: MainBloc(),
+    ));
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    expect(find.text('500'), findsOneWidget);
   });
 }

@@ -1,36 +1,10 @@
-import 'package:bloc_test/ui/login/blocs/login_bloc.dart';
 import 'package:bloc_test/main_bloc.dart';
-import 'package:bloc_test/ui/login/blocs/login_event.dart';
-import 'package:bloc_test/ui/login/blocs/login_state.dart';
+import 'package:bloc_test/ui/architectures/bloc/login/blocs/login_bloc.dart';
+import 'package:bloc_test/ui/architectures/bloc/login/blocs/login_event.dart';
+import 'package:bloc_test/ui/architectures/bloc/login/blocs/login_state.dart';
+import 'package:bloc_test/ui/architectures/bloc/home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-void main() => {
-	runApp(
-      MyApp(
-    mainBloc: MainBloc(),
-  ))
-};
-
-class MyApp extends StatelessWidget {
-
-  final MainBloc mainBloc;
-
-  const MyApp({Key key, this.mainBloc}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: BlocProviderTree(
-        blocProviders: mainBloc.getBlocs,
-        child: BlocCounterPage(),
-      ),
-    );
-  }
-}
 
 class BlocCounterPage extends StatefulWidget {
   BlocCounterPage({Key key}) : super(key: key);
@@ -40,6 +14,8 @@ class BlocCounterPage extends StatefulWidget {
 }
 
 class _BlocCounterPageState extends State<BlocCounterPage> {
+
+  TextEditingController controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +28,6 @@ class _BlocCounterPageState extends State<BlocCounterPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('You have pushed the button this many times:'),
             BlocBuilder<LoginEvent, LoginState>(
               bloc: _counterBloc,
               builder: (BuildContext context, LoginState state) {
@@ -64,7 +39,15 @@ class _BlocCounterPageState extends State<BlocCounterPage> {
                   return Text("${state.error}");
                 }
 
-                return Text("No Username");
+                return Center(
+                  child: TextFormField(
+                    key: Key('username'),
+                    controller: controller,
+                    decoration: InputDecoration(
+                        labelText: 'Enter your username'
+                    ),
+                  ),
+                );
               },
             )
           ],
@@ -72,7 +55,12 @@ class _BlocCounterPageState extends State<BlocCounterPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _counterBloc.dispatch(FetchLogin(username: "Yusuf"));
+          _counterBloc.callApi(controller.text).then((_) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MainScreen()),
+            );
+          }).catchError((_){});
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
